@@ -10,6 +10,7 @@ To use, simply `pip install git+https://github.com/janfreyberg/docargs.git`, and
 `docargs <packagename>`.
 
 `docargs` will import your package, so if there are side effects on import,
-those will occur.
+those will occur. To see it in action, check out the travis CI configuration
+on the [`superintendent` package](https://travis-ci.org/janfreyberg/superintendent)
 
 Currently, `docargs` only works with `numpydoc`-style docstrings. 
