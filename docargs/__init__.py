@@ -1,5 +1,7 @@
 import importlib
 import inspect
+import sys
+
 from numpydoc.docscrape import NumpyDocString
 import click
 
@@ -57,6 +59,5 @@ def cli(modulename=""):
     module = importlib.import_module(modulename)
     failures = check_docced_args(module)
     if failures > 0:
-        raise ValueError(
-            "Undocumented parameters in non-private function or classes!"
         )
+        sys.exit(1)
