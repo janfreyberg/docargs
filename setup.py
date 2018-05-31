@@ -32,7 +32,7 @@ setup(
     author_email='jan@asidatascience.com',
     packages=['docargs'],
     keywords=['linting'],
-    install_requires=['numpydoc', 'click'],
+    install_requires=['numpydoc', 'click', 'colorama'],
     entry_points={
           'console_scripts': ['docargs = docargs:cli']
      },
