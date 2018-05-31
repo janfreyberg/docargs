@@ -9,10 +9,9 @@ import click
 def check_docced_args(module):
     failures = 0
     for name, obj in inspect.getmembers(module):
-        if (
-            inspect.isclass(obj)
-            and obj.__module__ == module.__name__
-            and name[0] != "_"
+        if name[0] != "_" and (
+                getattr(obj, '__module__', None) == module.__name__
+                or getattr(obj, '__package__', None) == module.__name__
         ):
             signature_args = [
                 arg
