@@ -134,17 +134,26 @@ def check_module(module):
 
 
 @click.command()
-@click.argument("modulename")
-def cli(modulename=""):
-    module = importlib.import_module(modulename)
-    failure_tree = check_module(module)
+@click.argument("modulenames", nargs=-1)
+def cli(modulenames=()):
 
-    if len(failure_tree) > 0:
-        print(Fore.LIGHTRED_EX + "Some arguments were not documented:")
-        print(color_text(yaml.dump(failure_tree, default_flow_style=False)))
+    failed = False
+    for modulename in modulenames:
+
+        module = importlib.import_module(modulename)
+        failure_tree = check_module(module)
+
+        if len(failure_tree) > 0:
+            print(Fore.LIGHTRED_EX + "Some arguments were not documented:")
+            print(
+                color_text(yaml.dump(failure_tree, default_flow_style=False))
+            )
+            failed = True
+        else:
+            print(Fore.GREEN + "All arguments are documented ✓")
+    if failed:
         sys.exit(1)
     else:
-        print(Fore.GREEN + "All arguments are documented ✓")
         sys.exit(0)
 
 
@@ -157,4 +166,5 @@ def color_text(text: str) -> str:
             colored_text.append(Fore.RESET + line)
         else:
             colored_text.append(line)
+    colored_text.append(Fore.RESET)
     return "\n".join(colored_text)
