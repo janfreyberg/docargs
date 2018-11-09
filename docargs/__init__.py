@@ -85,7 +85,9 @@ def check_init(obj):
     """
     Check the documented and actual arguments for the __init__ method.
     """
-    signature_args = get_signature_params(obj)
+    signature_args = get_signature_params(obj) | get_signature_params(
+        obj.__init__
+    )
     docced_args = get_doc_params(obj) | get_doc_params(obj.__init__)
 
     return compare_args(signature_args, docced_args)
