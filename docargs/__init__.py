@@ -114,7 +114,7 @@ def check_class(obj):
     return output
 
 
-def check_module(module):
+def check_module(module, ignore_ambiguous_signatures):
 
     output = {}
 
@@ -128,25 +128,38 @@ def check_module(module):
             elif inspect.isfunction(obj):
                 output[".".join([obj.__module__, name])] = check_function(obj)
             elif inspect.ismodule(obj):
-                output.update(check_module(obj))
+                output.update(check_module(obj, ignore_ambiguous_signatures))
 
-    output = {
-        key: val
-        for key, val in output.items()
-        if val is not None and len(val) > 0
-    }
+    if not ignore_ambiguous_signatures:
+        output = {
+            key: val
+            for key, val in output.items()
+            if val is not None and len(val) > 0
+        }
+    else:
+        output = {
+            key: val
+            for key, val in output.items()
+            if val is not None and "Not in docstring" in val
+        }
+        output = {
+            key: val
+            for key, val in output.items()
+            if val is not None and len(val) > 0
+        }
     return output
 
 
 @click.command()
+@click.option("--ignore-ambiguous-signatures", default=False, is_flag=True)
 @click.argument("modulenames", nargs=-1)
-def cli(modulenames=()):
+def cli(ignore_ambiguous_signatures=False, modulenames=()):
 
     failed = False
     for modulename in modulenames:
 
         module = importlib.import_module(modulename)
-        failure_tree = check_module(module)
+        failure_tree = check_module(module, ignore_ambiguous_signatures)
 
         if len(failure_tree) > 0:
             print(Fore.LIGHTRED_EX + "Some arguments were not documented:")
