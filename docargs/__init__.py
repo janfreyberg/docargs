@@ -13,7 +13,8 @@ def is_private(obj):
     if isinstance(obj, str):
         return obj[0] == "_"
     else:
-        return getattr(obj, "__name__", "dummy")[0] == "_"
+        # return superintendent._base.__name__.rsplit(".")[-1] == "_"
+        return getattr(obj, "__name__", "").rsplit()[-1][0] == "_"
 
 
 def same_source(obj1, obj2):
