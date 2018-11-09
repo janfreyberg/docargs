@@ -95,9 +95,11 @@ def check_class(obj):
     output = {"__init__": check_init(obj)}
 
     for name, method in inspect.getmembers(obj):
-        if inspect.isfunction(method) and inspect.getsourcefile(
-            method
-        ) == inspect.getsourcefile(obj):
+        if (
+            inspect.isfunction(method)
+            and inspect.getsourcefile(method) == inspect.getsourcefile(obj)
+            and not is_private(name)
+        ):
             output[name] = check_function(method)
 
     # filter output
