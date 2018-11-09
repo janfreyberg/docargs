@@ -53,7 +53,7 @@ def get_doc_params(obj):
         return set()
 
 
-def get_signature_params(obj, ignore: tuple = ("self",)) -> set:
+def get_signature_params(obj, ignore: tuple = ("self", "cls")) -> set:
     return {
         arg for arg in inspect.getfullargspec(obj).args if arg not in ignore
     }
