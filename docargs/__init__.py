@@ -164,7 +164,7 @@ def color_text(text: str) -> str:
     for line in text.split("\n"):
         if "Not in" in line:
             colored_text.append(Fore.LIGHTRED_EX + line)
-        elif ":" in line:
+        elif "- " not in line:
             colored_text.append(Fore.RESET + line)
         else:
             colored_text.append(line)
