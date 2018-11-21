@@ -1,3 +1,4 @@
+from typing import Union, Dict, Optional
 import importlib
 import inspect
 import sys
@@ -8,56 +9,79 @@ from numpydoc.docscrape import NumpyDocString
 import click
 from colorama import Fore
 
-
-def is_private(obj):
-    if isinstance(obj, str):
-        return obj[0] == "_"
-    else:
-        # return superintendent._base.__name__.rsplit(".")[-1] == "_"
-        return getattr(obj, "__name__", "").rsplit()[-1][0] == "_"
+import ast
+import itertools
+from functools import singledispatch
 
 
-def same_source(obj1, obj2):
-    if inspect.ismodule(obj1) and not inspect.ismodule(obj2):
-        try:
-            return obj2.__module__.startswith(obj1.__package__)
-        except AttributeError:
-            return False
-    elif inspect.ismodule(obj2) and not inspect.ismodule(obj1):
-        try:
-            return obj1.__module__.startswith(obj2.__package__)
-        except AttributeError:
-            return False
+def parse_file(filename: str):
+    """
+    Parse a file's abstract syntax tree.
+    """
+    with open(filename) as f:
+        source = f.read()
 
-    try:
-        overlap = {
-            getattr(obj1, "__module__", None),
-            getattr(obj1, "__package__", None),
-        } & {
-            getattr(obj2, "__module__", None),
-            getattr(obj2, "__package__", None),
-        } - {
-            None
-        }
+    tree = ast.parse(source, filename)
 
-        return len(overlap) > 0
-
-    except TypeError:
-        return False
+    return tree
 
 
-def get_doc_params(obj):
-    docstring = inspect.getdoc(obj)
+def get_signature_params(
+    node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
+    ignore: tuple = ("self", "cls"),
+) -> set:
+    return {
+        argument.arg
+        for argument in itertools.chain(node.args.args, node.args.kwonlyargs)
+        if argument.arg not in ignore
+    }
+
+
+def get_doc_params(node: Union[ast.FunctionDef, ast.AsyncFunctionDef]):
+    docstring = ast.get_docstring(node)
     if docstring is not None:
         return {arg[0] for arg in NumpyDocString(docstring)["Parameters"]}
     else:
         return set()
 
 
-def get_signature_params(obj, ignore: tuple = ("self", "cls")) -> set:
-    return {
-        arg for arg in inspect.getfullargspec(obj).args if arg not in ignore
-    }
+def get_functions():
+    pass
+
+
+def is_private(
+    node: Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]
+):
+    return node.name[0] == "_"
+
+
+# def same_source(obj1, obj2):
+#     if inspect.ismodule(obj1) and not inspect.ismodule(obj2):
+#         try:
+#             return obj2.__module__.startswith(obj1.__package__)
+#         except AttributeError:
+#             return False
+#     elif inspect.ismodule(obj2) and not inspect.ismodule(obj1):
+#         try:
+#             return obj1.__module__.startswith(obj2.__package__)
+#         except AttributeError:
+#             return False
+
+#     try:
+#         overlap = {
+#             getattr(obj1, "__module__", None),
+#             getattr(obj1, "__package__", None),
+#         } & {
+#             getattr(obj2, "__module__", None),
+#             getattr(obj2, "__package__", None),
+#         } - {
+#             None
+#         }
+
+#         return len(overlap) > 0
+
+#     except TypeError:
+#         return False
 
 
 def compare_args(signature_args: set, docced_args: set):
@@ -71,7 +95,15 @@ def compare_args(signature_args: set, docced_args: set):
     return output if output else None
 
 
-def check_function(func):
+@singledispatch
+def check(node, ignore_ambiguous_signatures: bool = False) -> Optional[Dict]:
+    return None
+
+
+@check.register
+def check_function(
+    func: ast.FunctionDef, ignore_ambiguous_signatures: bool = False
+) -> Optional[Dict]:
     """
     Check the documented and actual arguments for a function.
     """
@@ -81,54 +113,50 @@ def check_function(func):
     return compare_args(signature_args, docced_args)
 
 
-def check_init(obj):
+def check_init(
+    obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
+) -> Optional[Dict]:
     """
     Check the documented and actual arguments for the __init__ method.
     """
-    signature_args = get_signature_params(obj) | get_signature_params(
-        obj.__init__
+    init_method = next(
+        method for method in obj.body if method.name == "__init__"
     )
+    signature_args = get_signature_params(init_method)
     docced_args = get_doc_params(obj) | get_doc_params(obj.__init__)
-
     return compare_args(signature_args, docced_args)
 
 
-def check_class(obj):
+@check.register
+def check_class(
+    obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
+) -> Optional[Dict]:
 
     output = {"__init__": check_init(obj)}
 
-    for name, method in inspect.getmembers(obj):
-        if (
-            inspect.isfunction(method)
-            and inspect.getsourcefile(method) == inspect.getsourcefile(obj)
-            and not is_private(name)
-        ):
-            output[name] = check_function(method)
+    for node in obj.body:
+        check_result = check(node)
+        if check_result is not None:
+            output[node.name] = check_result
 
-    # filter output
-    output = {
-        ".".join([obj.__module__, obj.__name__, key]): val
-        for key, val in output.items()
-        if val is not None
-    }
+    output = {".".join([obj.name, key]): val for key, val in output.items()}
     return output
 
 
-def check_module(module, ignore_ambiguous_signatures):
+@check.register
+def check_module(
+    module: ast.Module, ignore_ambiguous_signatures: bool = False
+):
 
     output = {}
 
-    for name, obj in inspect.getmembers(module):
+    for node in module.body:
 
-        if same_source(obj, module) and not is_private(name):
+        check_result = check(node)
 
-            if inspect.isclass(obj):
-                # output[name] = check_class(obj)
-                output.update(check_class(obj))
-            elif inspect.isfunction(obj):
-                output[".".join([obj.__module__, name])] = check_function(obj)
-            elif inspect.ismodule(obj):
-                output.update(check_module(obj, ignore_ambiguous_signatures))
+        if check_result is not None:
+
+            output.update(check_result)
 
     if not ignore_ambiguous_signatures:
         output = {
