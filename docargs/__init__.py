@@ -83,7 +83,7 @@ def check_function(
     """
     Check the documented and actual arguments for a function.
     """
-
+    print(func.name)
     signature_args, ambiguous = get_signature_params(func)
     docced_args = get_doc_params(func)
 
@@ -102,12 +102,26 @@ def check_init(
     """
     Check the documented and actual arguments for the __init__ method.
     """
-    init_method = next(
-        method for method in obj.body if method.name == "__init__"
-    )
-    signature_args = get_signature_params(init_method)
-    docced_args = get_doc_params(obj) | get_doc_params(obj.__init__)
-    return compare_args(signature_args, docced_args)
+    try:
+        init_method = next(
+            method
+            for method in obj.body
+            if isinstance(method, ast.FunctionDef)
+            and method.name == "__init__"
+        )
+    except StopIteration:
+        init_method = None
+
+    if init_method is not None:
+        signature_args, ambiguous = get_signature_params(init_method)
+        docced_args = get_doc_params(obj) | get_doc_params(init_method)
+        return compare_args(
+            signature_args,
+            docced_args,
+            ignore_ambiguous_signatures and ambiguous,
+        )
+    else:
+        return None
 
 
 @check.register
@@ -115,6 +129,7 @@ def check_class(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
 ) -> Optional[Dict]:
 
+    print(obj.name)
     output = {
         "__init__": check_init(
             obj, ignore_ambiguous_signatures=ignore_ambiguous_signatures
@@ -126,7 +141,7 @@ def check_class(
             node, ignore_ambiguous_signatures=ignore_ambiguous_signatures
         )
         if check_result is not None:
-            output[node.name] = check_result
+            output.update(check_result)
 
     output = {".".join([obj.name, key]): val for key, val in output.items()}
     return output
