@@ -20,6 +20,10 @@ if os.path.isfile("README.md"):
 else:
     readme = blurb
 
+requirements = ["numpydoc", "click", "colorama", "pyyaml", "flake8"]
+test_requirements = ["mypy"]
+
+
 setup(
     name=modulename,
     version=version,
@@ -37,7 +41,8 @@ setup(
     author_email="jan@asidatascience.com",
     packages=["docargs"],
     keywords=["linting"],
-    install_requires=["numpydoc", "click", "colorama", "pyyaml"],
+    install_requires=requirements,
+    extras_require={"tests": test_requirements},
     entry_points={
         "console_scripts": ["docargs = docargs:cli"],
         "flake8.extension": ["D00 = docargs.flake8:DocargsChecker"],
