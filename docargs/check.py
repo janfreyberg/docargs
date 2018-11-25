@@ -1,16 +1,15 @@
 import ast
 import itertools
-import yaml
 from functools import singledispatch
-from typing import Dict, Optional, Set, Tuple, Union
+from typing import Set, Tuple, Union, Iterator, List, Container
 
 from numpydoc.docscrape import NumpyDocString
 
-from .identify import is_private, find_init
+from .identify import find_init, is_private
 
 
 @singledispatch
-def check(node, ignore_ambiguous_signatures: bool = True) -> Optional[Dict]:
+def check(node, ignore_ambiguous_signatures: bool = True) -> None:
     """Check an object's argument documentation.
 
     Parameters
@@ -32,52 +31,99 @@ def check(node, ignore_ambiguous_signatures: bool = True) -> Optional[Dict]:
 
 @check.register
 def check_function(
-    func: ast.FunctionDef, ignore_ambiguous_signatures: bool = False
-) -> Optional[Dict]:
+    func: ast.FunctionDef, ignore_ambiguous_signatures: bool = True
+) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+    """Check the documented and actual arguments for a function.
+
+    Parameters
+    ----------
+    func : ast.FunctionDef
+        The function to check
+    ignore_ambiguous_signatures : bool, optional
+        Whether to ignore extra docstring parameters if the function signature
+        is ambiguous (the default is True).
+
+    Returns
+    -------
+    ast.FunctionDef
+        The function
+    Set[str]
+        Parameters in the signature but not in the docstring.
+    Set[str]]
+        Parameters in the docstring but not in the signature.
     """
-    Check the documented and actual arguments for a function.
-    """
+
     signature_args, ambiguous = get_signature_params(func)
     docced_args = get_doc_params(func)
 
-    undocumented, overdocumented = compare_args(
+    underdocumented, overdocumented = compare_args(
         signature_args, docced_args, ignore_ambiguous_signatures and ambiguous
     )
 
-    yield func, undocumented, overdocumented
+    yield func, underdocumented, overdocumented
 
 
 def check_init(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
-) -> Optional[Dict]:
+) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+    """Check the documented and actual arguments for an init method.
+
+    This combines the parameters in the init method docstring and the class
+    docstring, as either are OK.
+
+    Parameters
+    ----------
+    obj : ast.ClassDef
+        The class for which to check the __init__ method.
+    ignore_ambiguous_signatures : bool, optional
+        Whether to ignore extra docstring parameters if the function signature
+        is ambiguous (the default is True).
+
+    Yields
+    ------
+    ast.FunctionDef
+        The __init__ method AST node.
+    Set[str]
+        Parameters in the signature but not in the docstring.
+    Set[str]]
+        Parameters in the docstring but not in the signature.
     """
-    Check the documented and actual arguments for the __init__ method.
-    """
-    try:
-        init_method = next(
-            method
-            for method in obj.body
-            if isinstance(method, ast.FunctionDef)
-            and method.name == "__init__"
-        )
-    except StopIteration:
-        init_method = None
+    init_method = find_init(obj)
 
     if init_method is not None:
         signature_args, ambiguous = get_signature_params(init_method)
         docced_args = get_doc_params(obj) | get_doc_params(init_method)
-        undocumented, overdocumented = compare_args(
+        underdocumented, overdocumented = compare_args(
             signature_args,
             docced_args,
             ignore_ambiguous_signatures and ambiguous,
         )
-        yield init_method, undocumented, overdocumented
+        yield init_method, underdocumented, overdocumented
 
 
 @check.register
 def check_class(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
-) -> Optional[Dict]:
+) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+    """Check the documented and actual arguments for a class's methods.
+
+    Parameters
+    ----------
+    obj : ast.ClassDef
+        The class to check.
+    ignore_ambiguous_signatures : bool, optional
+        Whether to ignore extra docstring parameters if the function signature
+        is ambiguous (the default is True).
+
+    Yields
+    ------
+    ast.FunctionDef
+        The __init__ method AST node.
+    Set[str]
+        Parameters in the signature but not in the docstring.
+    Set[str]]
+        Parameters in the docstring but not in the signature.
+    """
 
     if find_init(obj) is not None:
         yield from check_init(obj)
@@ -93,7 +139,7 @@ def check_class(
 @check.register
 def check_module(
     module: ast.Module, ignore_ambiguous_signatures: bool = True
-) -> Dict:
+) -> Iterator[Tuple[ast.FunctionDef, Set[str], Set[str]]]:
     """Check a module.
 
     Parameters
@@ -114,16 +160,11 @@ def check_module(
             check_result = check(node, ignore_ambiguous_signatures)
             if check_result is not None:
                 yield from check_result
-                # print(node.name)
-                # print(check_result)
-                # node, underdocumented, overdocumented = check_result
-                # if underdocumented or overdocumented:
-                #     yield node, underdocumented, overdocumented
 
 
 def get_signature_params(
     node: Union[ast.FunctionDef, ast.AsyncFunctionDef],
-    ignore: Tuple[str] = ("self", "cls"),
+    ignore: Container[str] = ("self", "cls"),
 ) -> Tuple[Set[str], bool]:
     """Get parameters in a function signature.
 
@@ -131,7 +172,7 @@ def get_signature_params(
     ----------
     node : Union[ast.FunctionDef, ast.AsyncFunctionDef]
         An ast function node
-    ignore : tuple, optional
+    ignore : tuple
         Which parameter names to ignore (the default is ("self", "cls"),
         which don't need documenting)
 
@@ -151,8 +192,20 @@ def get_signature_params(
 
 
 def get_doc_params(
-    node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    node: Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]
 ) -> Set[str]:
+    """Get parameters in a function signature.
+
+    Parameters
+    ----------
+    node : Union[ast.FunctionDef, ast.AsyncFunctionDef]
+        An ast function node
+
+    Returns
+    -------
+    signature_params : Set[str]
+    ambiguous : bool
+    """
     docstring = ast.get_docstring(node)
     if docstring is not None:
         return {arg[0] for arg in NumpyDocString(docstring)["Parameters"]}
@@ -163,12 +216,22 @@ def get_doc_params(
 def compare_args(
     signature_args: set, docced_args: set, ambiguous: bool
 ) -> Tuple[list, list]:
+    """[summary]
 
-    output = {}
-    if signature_args - docced_args:
-        output["Not in docstring"] = list(signature_args - docced_args)
-    if docced_args - signature_args and not ambiguous:
-        output["Not in signature"] = list(docced_args - signature_args)
+    Parameters
+    ----------
+    signature_args : set
+        The arguments in the function signature
+    docced_args : set
+        The arguments in the docstring.
+    ambiguous : bool
+        Whether the function is ambiguous.
+
+    Returns
+    -------
+    underdocumented : list
+    overdocumented : list
+    """
 
     underdocumented = list(signature_args - docced_args)
     overdocumented = [] if ambiguous else list(docced_args - signature_args)

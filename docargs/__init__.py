@@ -1,6 +1,5 @@
 import sys
 
-import yaml
 import click
 from colorama import Fore
 import ast
@@ -22,19 +21,28 @@ from .check import check
 def cli(ignore_ambiguous_signatures=False, files=()):
     """
     Check if arguments in functions in FILES have been documented.
+
+    Parameters
+    ----------
+    ignore_ambiguous_signatures : bool
+        Whether to be strict on ambiguous function signatures
+    files : list
+        The files to check.
     """
 
-    failure_tree = {}
     failed = False
     for module_file in files:
         source_code = module_file.read()
         tree = ast.parse(source_code)
 
-        for statement, underocumented, overdocumented in check(tree):
+        for statement, underdocumented, overdocumented in check(tree):
             failed = True
-            if underocumented or overdocumented:
+            if underdocumented or overdocumented:
                 cli_error(
-                    module_file.name, statement, underocumented, overdocumented
+                    module_file.name,
+                    statement,
+                    underdocumented,
+                    overdocumented,
                 )
 
     if failed:
@@ -44,13 +52,15 @@ def cli(ignore_ambiguous_signatures=False, files=()):
         sys.exit(0)
 
 
-def cli_error(file_name, statement, underocumented, overdocumented):
+def cli_error(  # noqa DOO1
+    file_name, statement, underdocumented, overdocumented
+):
     click.echo(f"{file_name}:{statement.lineno}:{statement.col_offset}: ")
-    if len(underocumented) > 0:
+    if len(underdocumented) > 0:
         click.secho(
             (
                 f"These parameters are not "
-                f"documented: {', '.join(underocumented)}"
+                f"documented: {', '.join(underdocumented)}"
             ),
             fg="red",
         )
@@ -64,7 +74,7 @@ def cli_error(file_name, statement, underocumented, overdocumented):
         )
 
 
-def color_text(text: str) -> str:
+def color_text(text: str) -> str:  # noqa DOO1
     colored_text = []
     for line in text.split("\n"):
         if "Not in" in line:

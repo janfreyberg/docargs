@@ -1,10 +1,8 @@
 import ast
-from typing import Union
+from typing import Union, Optional
 
 
-def is_private(
-    node: Union[ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef]
-) -> bool:
+def is_private(node: Union[ast.AST]) -> bool:
     """Return whether or not the node is "private" (starts with an underscore)
 
     Parameters
@@ -20,7 +18,20 @@ def is_private(
     return getattr(node, "name", "not a function")[0] == "_"
 
 
-def find_init(node: ast.ClassDef):
+def find_init(node: ast.ClassDef) -> Optional[ast.FunctionDef]:
+    """Find the init-method of a class.
+
+    Parameters
+    ----------
+    node : ast.ClassDef
+        The class
+
+    Returns
+    -------
+    ast.FuncDef
+        The init method.
+    """
+
     try:
         return next(
             method
