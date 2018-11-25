@@ -9,8 +9,7 @@ matrix:
       dist: xenial
       sudo: true
 script:
-  - pip install -qq flake8 coverage coveralls mypy
+  - pip install -qq flake8 mypy
   - mypy docargs --ignore-missing-imports
   - pip install -qq -e '.[tests]'
-  - coverage run -m flake8 docargs
-  - coveralls
+  - flake8 ./docargs
