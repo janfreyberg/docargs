@@ -2,11 +2,12 @@ import ast
 from flake8 import utils as stdin_utils
 
 from .check import check
+from .version import version
 
 
 class DocargsChecker:
     name = "flake8_docargs"
-    version = "0.0.4"
+    version = version
 
     def __init__(self, tree, filename):
         self.tree = tree
