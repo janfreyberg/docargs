@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to docargs’s documentation! &mdash; docargs 0.0.5 documentation</title>
+  <title>Using docargs as a flake8 plugin &mdash; docargs 0.0.5 documentation</title>
   
 
   
@@ -30,7 +30,8 @@
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using docargs as a flake8 plugin" href="using-flake8.html" /> 
+    <link rel="next" title="Using docargs as a command line tool" href="using-cli.html" />
+    <link rel="prev" title="Welcome to docargs’s documentation!" href="index.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -49,7 +50,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> docargs
+            <a href="index.html" class="icon icon-home"> docargs
           
 
           
@@ -84,8 +85,8 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="using-flake8.html">Using docargs as a flake8 plugin</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using docargs as a flake8 plugin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using-cli.html">Using docargs as a command line tool</a></li>
 </ul>
 
@@ -101,7 +102,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">docargs</a>
+          <a href="index.html">docargs</a>
         
       </nav>
 
@@ -130,15 +131,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Welcome to docargs’s documentation!</li>
+      <li>Using <code class="docutils literal notranslate"><span class="pre">docargs</span></code> as a flake8 plugin</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/using-flake8.md.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -170,33 +171,25 @@
     margin-right: 4px;  /* make room for the exclamation icon */
 }
 </style>
-<div class="section" id="welcome-to-docargs-s-documentation">
-<h1>Welcome to docargs’s documentation!<a class="headerlink" href="#welcome-to-docargs-s-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>You can simply install docargs from pypi:</p>
-<div class="highlight-guess notranslate"><div class="highlight"><pre><span></span>pip install docargs
-</pre></div>
-</div>
-</div>
-<div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="using-flake8.html">Using docargs as a flake8 plugin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="using-cli.html">Using docargs as a command line tool</a></li>
-</ul>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-docargs-as-a-flake8-plugin">
+<h1>Using <code class="docutils literal notranslate"><span class="pre">docargs</span></code> as a flake8 plugin<a class="headerlink" href="#using-docargs-as-a-flake8-plugin" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="http://flake8.pycqa.org/en/latest/">flake8</a> is a popular python
+<a class="reference external" href="https://en.wikipedia.org/wiki/Lint_(software">linting program</a>). Since many
+people use it already, docargs integrates with flake8 and provides these two
+errors:</p>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><strong>D001</strong> is raised if you have not documented some of your arguments.</li>
+<li><strong>D002</strong> is raised if you have a parameter in your docstring that is not in your function signature.</li>
 </ul>
-</div>
+<p>flake8 is enabled by default when you install docargs. Because many editors,
+such as <a class="reference external" href="https://code.visualstudio.com/">Visual Studio Code</a> or
+<a class="reference external" href="https://atom.io/">Atom</a>, support flake8 integration, docargs can integrate
+with those editors.</p>
+<p>This also means that any flake8 checks you run from the command line will
+fail if you have not yet documented your parameters. For an example of how
+to leverage this in your CI pipeline, take a look at the
+<a class="reference external" href="https://github.com/janfreyberg/docargs/blob/master/.travis.yml">travis configuration</a>
+for docargs.</p>
 </div>
 
 
@@ -207,8 +200,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="using-flake8.html" class="btn btn-neutral float-right" title="Using docargs as a flake8 plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="using-cli.html" class="btn btn-neutral float-right" title="Using docargs as a command line tool" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to docargs’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
