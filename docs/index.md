@@ -18,6 +18,7 @@ pip install docargs
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
    Using docargs as a flake8 plugin <using-flake8.md>
    Using docargs as a command line tool <using-cli.md>
 

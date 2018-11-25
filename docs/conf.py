@@ -26,7 +26,7 @@ copyright = "2018, Jan Freyberg"
 author = "Jan Freyberg"
 
 version_ns = {}
-version_file = pathlib.Path("..").resolve() / "superintendent" / "version.py"
+version_file = pathlib.Path("..").resolve() / project / "version.py"
 exec(version_file.read_text(), version_ns)
 version = version_ns["version"]
 
