@@ -1,9 +1,10 @@
 """Installer."""
-from setuptools import setup
+import os.path
 
 # To use a consistent encoding
 from codecs import open
-import os.path
+
+from setuptools import setup
 
 modulename = "docargs"
 here = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,10 @@ if os.path.isfile("README.md"):
     readme = open("README.md", "r").read()
 else:
     readme = blurb
+
+requirements = ["numpydoc", "click", "colorama", "pyyaml", "flake8"]
+test_requirements = ["mypy"]
+
 
 setup(
     name=modulename,
@@ -36,6 +41,10 @@ setup(
     author_email="jan@asidatascience.com",
     packages=["docargs"],
     keywords=["linting"],
-    install_requires=["numpydoc", "click", "colorama", "pyyaml"],
-    entry_points={"console_scripts": ["docargs = docargs:cli"]},
+    install_requires=requirements,
+    extras_require={"tests": test_requirements},
+    entry_points={
+        "console_scripts": ["docargs = docargs:cli"],
+        "flake8.extension": ["D00 = docargs.flake8:DocargsChecker"],
+    },
 )
