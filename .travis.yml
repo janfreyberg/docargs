@@ -2,7 +2,6 @@ language: python
 notifications:
   email: false
 python:
-  - "3.5"
   - "3.6"
 matrix:
   include:
@@ -11,7 +10,7 @@ matrix:
       sudo: true
 script:
   - pip install -qq flake8 coverage coveralls mypy
-  - mypy docargs
+  - mypy docargs --ignore-missing-imports
   - pip install -qq -e '.[tests]'
   - coverage run -m flake8 docargs
   - coveralls
