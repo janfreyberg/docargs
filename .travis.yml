@@ -9,7 +9,7 @@ matrix:
       dist: xenial
       sudo: true
 script:
-  - pip install -qq flake8 mypy
+  - pip install -qq flake8 mypy docargs
+  - flake8 ./docargs  # this also checks docargs!
   - mypy docargs --ignore-missing-imports
   - pip install -qq -e '.[tests]'
-  - flake8 ./docargs

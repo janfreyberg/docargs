@@ -3,17 +3,27 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to docargs's documentation!
-===================================
+# Welcome to docargs's documentation!
+
+## Installation
+
+You can simply install docargs from pypi:
+
+```
+pip install docargs
+```
+
+## Usage
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   Using docargs as a flake8 plugin <using-flake8.md>
+   Using docargs as a command line tool <using-cli.md>
 
 
 
-Indices and tables
-==================
+## Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
