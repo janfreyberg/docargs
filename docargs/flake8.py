@@ -66,15 +66,15 @@ class DocargsChecker:
         if underdocumented is not None and len(underdocumented) > 0:
             message = (
                 "D001 "
-                f"These parameters are not "
-                f"documented: {', '.join(underdocumented)}."
+                "These parameters are not "
+                "documented: {}.".format(", ".join(underdocumented))
             )
             yield line, column, message, type(self)
 
         if overdocumented is not None and len(overdocumented) > 0:
             message = (
                 "D002 "
-                f"Documented parameters not in the "
-                f"function signature: {', '.join(overdocumented)}"
+                "Documented parameters not in the "
+                "function signature: {}".format(", ".join(overdocumented))
             )
             yield line, column, message, type(self)

@@ -55,26 +55,28 @@ def cli(ignore_ambiguous_signatures=False, files=()):
 def cli_error(  # noqa DOO1
     file_name, statement, underdocumented, overdocumented
 ):
-    click.echo(f"{file_name}:{statement.lineno}:{statement.col_offset}: ")
+    click.echo(
+        "{}:{}:{}: ".format(file_name, statement.lineno, statement.col_offset)
+    )
     if len(underdocumented) > 0:
         click.secho(
             (
-                f"These parameters are not "
-                f"documented: {', '.join(underdocumented)}"
+                "These parameters are not "
+                "documented: {}".format(", ".join(underdocumented))
             ),
             fg="red",
         )
     if len(overdocumented) > 0:
         click.secho(
             (
-                f"These parameters are documented but not in the "
-                f"function signature: {', '.join(overdocumented)}"
+                "These parameters are documented but not in the "
+                "function signature: {}".format(", ".join(overdocumented))
             ),
             fg="yellow",
         )
 
 
-def color_text(text: str) -> str:  # noqa DOO1
+def color_text(text: str) -> str:
     colored_text = []
     for line in text.split("\n"):
         if "Not in" in line:
