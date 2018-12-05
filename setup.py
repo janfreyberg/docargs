@@ -44,7 +44,7 @@ setup(
     install_requires=requirements,
     extras_require={"tests": test_requirements},
     entry_points={
-        "console_scripts": ["docargs = docargs:cli"],
+        "console_scripts": ["docargs = docargs.cli:cli"],
         "flake8.extension": ["D00 = docargs.flake8:DocargsChecker"],
     },
 )
