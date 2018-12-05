@@ -126,7 +126,7 @@ def check_class(
     """
 
     if find_init(obj) is not None:
-        yield from check_init(obj)
+        yield from check_init(obj, ignore_ambiguous_signatures)
 
     for node in ast.iter_child_nodes(obj):
 
