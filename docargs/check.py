@@ -27,8 +27,8 @@ def check(
     Optional[Dict]
         [description]
     """
-
-    raise StopIteration
+    return
+    yield
 
 
 @check.register(ast.FunctionDef)
