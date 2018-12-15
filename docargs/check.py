@@ -29,7 +29,7 @@ def check(node, ignore_ambiguous_signatures: bool = True) -> None:
     return None
 
 
-@check.register
+@check.register(ast.FunctionDef)
 def check_function(
     func: ast.FunctionDef, ignore_ambiguous_signatures: bool = True
 ) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
@@ -101,7 +101,7 @@ def check_init(
         yield init_method, underdocumented, overdocumented
 
 
-@check.register
+@check.register(ast.ClassDef)
 def check_class(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
 ) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
@@ -136,7 +136,7 @@ def check_class(
                 yield from check_result
 
 
-@check.register
+@check.register(ast.Module)
 def check_module(
     module: ast.Module, ignore_ambiguous_signatures: bool = True
 ) -> Iterator[Tuple[ast.FunctionDef, Set[str], Set[str]]]:
