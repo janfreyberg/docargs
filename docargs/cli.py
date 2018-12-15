@@ -77,6 +77,19 @@ def cli_error(  # noqa DOO1
 
 
 def color_text(text: str) -> str:
+    """Color some text
+
+    Parameters
+    ----------
+    text : str
+        The text to color
+
+    Returns
+    -------
+    str
+        The colored text.
+    """
+
     colored_text = []
     for line in text.split("\n"):
         if "Not in" in line:
