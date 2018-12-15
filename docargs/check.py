@@ -9,7 +9,9 @@ from .identify import find_init, is_private
 
 
 @singledispatch
-def check(node, ignore_ambiguous_signatures: bool = True) -> None:
+def check(
+    node, ignore_ambiguous_signatures: bool = True
+) -> Iterator[Tuple[ast.AST, List[str], List[str]]]:
     """Check an object's argument documentation.
 
     Parameters
@@ -26,13 +28,13 @@ def check(node, ignore_ambiguous_signatures: bool = True) -> None:
         [description]
     """
 
-    return None
+    raise StopIteration
 
 
-@check.register
+@check.register(ast.FunctionDef)
 def check_function(
     func: ast.FunctionDef, ignore_ambiguous_signatures: bool = True
-) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+) -> Iterator[Tuple[ast.AST, List[str], List[str]]]:
     """Check the documented and actual arguments for a function.
 
     Parameters
@@ -65,7 +67,7 @@ def check_function(
 
 def check_init(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
-) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+) -> Iterator[Tuple[ast.AST, List[str], List[str]]]:
     """Check the documented and actual arguments for an init method.
 
     This combines the parameters in the init method docstring and the class
@@ -101,10 +103,10 @@ def check_init(
         yield init_method, underdocumented, overdocumented
 
 
-@check.register
+@check.register(ast.ClassDef)
 def check_class(
     obj: ast.ClassDef, ignore_ambiguous_signatures: bool = False
-) -> Iterator[Tuple[ast.FunctionDef, List[str], List[str]]]:
+) -> Iterator[Tuple[ast.AST, List[str], List[str]]]:
     """Check the documented and actual arguments for a class's methods.
 
     Parameters
@@ -136,10 +138,10 @@ def check_class(
                 yield from check_result
 
 
-@check.register
+@check.register(ast.Module)
 def check_module(
     module: ast.Module, ignore_ambiguous_signatures: bool = True
-) -> Iterator[Tuple[ast.FunctionDef, Set[str], Set[str]]]:
+) -> Iterator[Tuple[ast.AST, List[str], List[str]]]:
     """Check a module.
 
     Parameters
