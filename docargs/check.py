@@ -7,6 +7,8 @@ from numpydoc.docscrape import NumpyDocString
 
 from .identify import find_init, is_private
 
+from docstring_parser.parser import ParseError, parse
+
 
 @singledispatch
 def check(
@@ -200,7 +202,7 @@ def get_doc_params(
 
     Parameters
     ----------
-    node : Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    node : ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef
         An ast function node
 
     Returns
@@ -209,8 +211,22 @@ def get_doc_params(
     ambiguous : bool
     """
     docstring = ast.get_docstring(node)
+    parameters_in_docstring: Set[str] = set()
     if docstring is not None:
-        return {arg[0] for arg in NumpyDocString(docstring)["Parameters"]}
+        try:
+            # check if google or Rest docstring works:
+            parsed_docstring = parse(docstring)
+            parameters_in_docstring = parameters_in_docstring | {
+                param.arg_name for param in parsed_docstring.params
+            }
+        except ParseError:
+            pass
+
+        # else try numpy doc:
+        parameters_in_docstring = parameters_in_docstring | {
+            arg[0] for arg in NumpyDocString(docstring)["Parameters"]
+        }
+        return parameters_in_docstring
     else:
         return set()
 

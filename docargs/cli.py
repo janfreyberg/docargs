@@ -55,6 +55,13 @@ def cli(ignore_ambiguous_signatures=False, files=()):
 def cli_error(  # noqa DOO1
     file_name, statement, underdocumented, overdocumented
 ):
+    """[summary]
+
+    Args:
+        file_name: hi friends
+        underdocumented (bool): hello there
+        overdocumented (bool): hello there
+    """
     click.echo(
         "{}:{}:{}: ".format(file_name, statement.lineno, statement.col_offset)
     )
