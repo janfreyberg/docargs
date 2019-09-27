@@ -211,7 +211,7 @@ def get_doc_params(
     ambiguous : bool
     """
     docstring = ast.get_docstring(node)
-    parameters_in_docstring = set()
+    parameters_in_docstring: Set[str] = set()
     if docstring is not None:
         try:
             # check if google or Rest docstring works:
