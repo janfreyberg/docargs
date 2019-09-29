@@ -20,7 +20,14 @@ if os.path.isfile("README.md"):
 else:
     readme = blurb
 
-requirements = ["numpydoc", "click", "colorama", "pyyaml", "flake8"]
+requirements = [
+    "numpydoc",
+    "click",
+    "colorama",
+    "pyyaml",
+    "flake8",
+    "docstring-parser",
+]
 test_requirements = ["mypy"]
 
 
