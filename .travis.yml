@@ -1,15 +1,12 @@
+dist: xenial
 language: python
 notifications:
   email: false
 python:
   - "3.6"
-matrix:
-  include:
-    - python: 3.7
-      dist: xenial
-      sudo: true
+  - "3.7"
 script:
-  - pip install -qq flake8 mypy docargs
+  - pip install -qq flake8 mypy
+  - pip install -qq -e '.[tests]'
   - flake8 ./docargs  # this also checks docargs!
   - mypy docargs --ignore-missing-imports
-  - pip install -qq -e '.[tests]'
