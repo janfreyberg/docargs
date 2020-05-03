@@ -213,22 +213,25 @@ def get_doc_params(
     docstring = ast.get_docstring(node)
     parameters_in_docstring: Set[str] = set()
     if docstring is not None:
-        try:
-            # check if google or Rest docstring works:
-            parsed_docstring = parse(docstring)
+        # try numpy doc:
+        docstring_numpy = NumpyDocString(docstring)
+        if any(list(docstring_numpy.values())[3:]):
             parameters_in_docstring = parameters_in_docstring | {
-                param.arg_name for param in parsed_docstring.params
+                arg[0] for arg in docstring_numpy["Parameters"]
             }
-        except ParseError:
-            pass
+            # return parameters_in_docstring
 
-        # else try numpy doc:
-        parameters_in_docstring = parameters_in_docstring | {
-            arg[0] for arg in NumpyDocString(docstring)["Parameters"]
-        }
-        return parameters_in_docstring
-    else:
-        return set()
+        else:
+            try:
+                # check if google or Rest docstring works:
+                parsed_docstring = parse(docstring)
+                parameters_in_docstring = parameters_in_docstring | {
+                    param.arg_name for param in parsed_docstring.params
+                }
+            except ParseError:
+                pass
+
+    return parameters_in_docstring
 
 
 def compare_args(

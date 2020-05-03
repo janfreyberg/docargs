@@ -28,7 +28,7 @@ requirements = [
     "flake8",
     "docstring-parser",
 ]
-test_requirements = ["mypy"]
+test_requirements = ["mypy", "black", "pytest", "flake8"]
 
 
 setup(
@@ -49,7 +49,7 @@ setup(
     packages=["docargs"],
     keywords=["linting"],
     install_requires=requirements,
-    extras_require={"tests": test_requirements},
+    extras_require={"tests": test_requirements, "test": test_requirements},
     entry_points={
         "console_scripts": ["docargs = docargs.cli:cli"],
         "flake8.extension": ["D00 = docargs.flake8:DocargsChecker"],
