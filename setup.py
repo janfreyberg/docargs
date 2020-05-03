@@ -28,7 +28,7 @@ requirements = [
     "flake8",
     "docstring-parser",
 ]
-test_requirements = ["mypy"]
+test_requirements = ["mypy", "black", "pytest", "flake8"]
 
 
 setup(
