@@ -20,11 +20,11 @@ jobs:
         python -m pip install -qq --upgrade pip
         pip install '.[tests]'
     - name: Lint with flake8
-      run: flake8 src/
+      run: flake8 docargs/
     - name: Check black formatting
-      run: black --check src/
+      run: black --check docargs/
     - name: Mypy test analysis
-      run: mypy --ignore-missing-imports src/
+      run: mypy --ignore-missing-imports docargs/
     - name: Test with pytest
       run: python -m pytest # --cov=src/
     # - name: Update coveralls
